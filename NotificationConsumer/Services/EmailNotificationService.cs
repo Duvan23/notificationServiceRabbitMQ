@@ -1,4 +1,6 @@
 ﻿using NotificationConsumer.Models;
+using System.Net;
+using System.Net.Mail;
 
 namespace NotificationConsumer.Services
 {
@@ -21,7 +23,22 @@ namespace NotificationConsumer.Services
                 _logger.LogInformation("Processing email notification for {Recipient}", notification.Recipient);
 
                 // Simulate email sending delay
-                await Task.Delay(100000);
+                await Task.Delay(1000);
+
+                using var client = new SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new NetworkCredential("test@gmail.com", "key"),
+                    EnableSsl = true
+                };
+
+                var mail = new MailMessage(
+                    from: "test60@gmail.com",
+                    to: notification.Recipient,
+                    subject: notification.Subject ?? "(sin asunto)",
+                    body: notification.Message ?? string.Empty
+                );
+
+                await client.SendMailAsync(mail);
 
                 // Here you would integrate with your actual email service (SendGrid, SMTP, etc.)
                 _logger.LogInformation("EMAIL SENT: To={Recipient}, Subject={Subject}, Message={Message}",
